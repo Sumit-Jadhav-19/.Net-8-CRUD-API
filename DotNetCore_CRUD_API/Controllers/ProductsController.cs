@@ -65,5 +65,15 @@ namespace DotNetCore_CRUD_API.Controllers
             _context.SaveChanges();
             return Ok(product);
         }
+
+        //Get product by pagination
+        [HttpGet("pagination")]
+        public IActionResult GetProduct([FromQuery] int pageNumber, [FromQuery] int pageSize)
+        {
+            int skip = (pageNumber - 1) * pageSize;
+            var products = _context.products.Skip(skip).Take(pageSize).ToList();
+            if (products.Count == 0) return NotFound();
+            return Ok(products);
+        }
     }
 }
