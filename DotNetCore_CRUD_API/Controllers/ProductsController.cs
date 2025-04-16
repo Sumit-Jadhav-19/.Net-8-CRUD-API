@@ -1,7 +1,13 @@
-﻿using DotNetCore_CRUD_API.Data;
+﻿using CsvHelper;
+using DotNetCore_CRUD_API.Data;
 using DotNetCore_CRUD_API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NLog;
+using System.Formats.Asn1;
+using System.Globalization;
+using System.Text;
 
 namespace DotNetCore_CRUD_API.Controllers
 {
@@ -10,9 +16,11 @@ namespace DotNetCore_CRUD_API.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly APIDbContext _context;
-        public ProductsController(APIDbContext dbContext)
+        private readonly ILogger<ProductsController> _logger;
+        public ProductsController(APIDbContext dbContext, ILogger<ProductsController> logger)
         {
             _context = dbContext;
+            _logger = logger;
         }
 
         //Get all products
@@ -20,6 +28,7 @@ namespace DotNetCore_CRUD_API.Controllers
         public IActionResult GetAll()
         {
             var products = _context.products.ToList();
+            _logger.LogInformation("Get all products");
             return Ok(products);
         }
 
@@ -75,5 +84,24 @@ namespace DotNetCore_CRUD_API.Controllers
             if (products.Count == 0) return NotFound();
             return Ok(products);
         }
+
+
+        [HttpGet("export-csv")]
+        public IActionResult ExportToCsv()
+        {
+            var products = _context.products.ToList();
+
+            var memoryStream = new MemoryStream();
+            using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var csvWriter = new CsvHelper.CsvWriter(streamWriter, CultureInfo.InvariantCulture))
+            {
+                csvWriter.WriteRecords(products);
+            }
+
+            memoryStream.Position = 0; // Reset the position before returning
+            return File(memoryStream, "text/csv", "products.csv");
+        }
+
+
     }
 }
