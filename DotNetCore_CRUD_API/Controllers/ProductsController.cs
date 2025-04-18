@@ -27,7 +27,7 @@ namespace DotNetCore_CRUD_API.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var products = _context.products.ToList();
+            var products = _context.products.IgnoreQueryFilters().ToList();
             _logger.LogInformation("Get all products");
             return Ok(products);
         }
@@ -71,6 +71,17 @@ namespace DotNetCore_CRUD_API.Controllers
             var product = _context.products.FirstOrDefault(x => x.Id == id);
             if (product is null) return NotFound();
             _context.products.Remove(product);
+            _context.SaveChanges();
+            return Ok(product);
+        }
+        //Soft delete product
+        [HttpDelete("soft-delete/{id:int}")]
+        public IActionResult SoftDeleteProduct(int id)
+        {
+            var product = _context.products.FirstOrDefault(x => x.Id == id);
+            if (product is null) return NotFound();
+            product.IsDeleted = true;
+            _context.products.Update(product);
             _context.SaveChanges();
             return Ok(product);
         }

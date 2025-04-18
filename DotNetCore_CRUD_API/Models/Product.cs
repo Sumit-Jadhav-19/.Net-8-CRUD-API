@@ -9,5 +9,6 @@ namespace DotNetCore_CRUD_API.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

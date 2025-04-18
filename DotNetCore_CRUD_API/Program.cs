@@ -1,4 +1,5 @@
 using DotNetCore_CRUD_API.Data;
+using DotNetCore_CRUD_API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using NLog.Extensions.Logging;
 
@@ -33,6 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<RateLimitingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
