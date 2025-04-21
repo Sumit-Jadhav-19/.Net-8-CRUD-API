@@ -1,5 +1,6 @@
 using DotNetCore_CRUD_API.Data;
 using DotNetCore_CRUD_API.Middlewares;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using NLog.Extensions.Logging;
 
@@ -24,6 +25,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<APIDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Register FluentValidation
+builder.Services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
 
 var app = builder.Build();
 
@@ -35,6 +38,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<RateLimitingMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

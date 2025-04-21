@@ -1,6 +1,8 @@
 ﻿using CsvHelper;
 using DotNetCore_CRUD_API.Data;
 using DotNetCore_CRUD_API.Models;
+using DotNetCore_CRUD_API.Validator;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +19,12 @@ namespace DotNetCore_CRUD_API.Controllers
     {
         private readonly APIDbContext _context;
         private readonly ILogger<ProductsController> _logger;
-        public ProductsController(APIDbContext dbContext, ILogger<ProductsController> logger)
+        private readonly IValidator<Product> _validator;
+        public ProductsController(APIDbContext dbContext, ILogger<ProductsController> logger, IValidator<Product> validator)
         {
             _context = dbContext;
             _logger = logger;
+            _validator = validator;
         }
 
         //Get all products
@@ -45,15 +49,28 @@ namespace DotNetCore_CRUD_API.Controllers
         [HttpPost]
         public IActionResult AddProduct([FromBody] Product product)
         {
-            _context.products.Add(product);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+            var validateResult = _validator.Validate(product);
+            if (validateResult.IsValid)
+            {
+                _context.products.Add(product);
+                _context.SaveChanges();
+                return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+            }
+            else
+            {
+                return BadRequest(validateResult.Errors);
+            }
         }
 
         //Update product
         [HttpPut("products/{id:int}")]
         public IActionResult UpdateProduct(int id, Product product)
         {
+            var validateResult = _validator.Validate(product);
+            if (validateResult.IsValid)
+            {
+                return BadRequest(validateResult.Errors);
+            }
             var existProduct = _context.products.FirstOrDefault(x => x.Id == id);
             if (existProduct is null) return NotFound();
             existProduct.Name = product.Name;
