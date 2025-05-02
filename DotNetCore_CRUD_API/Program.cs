@@ -39,6 +39,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<RequestLogginMiddelware>();
 app.UseHttpsRedirection();
 
 app.UseResponseCaching();
