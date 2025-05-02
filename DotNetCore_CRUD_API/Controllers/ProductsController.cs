@@ -29,6 +29,7 @@ namespace DotNetCore_CRUD_API.Controllers
 
         //Get all products
         [HttpGet]
+        [ResponseCache(Duration = 30)]
         public IActionResult GetAll()
         {
             var products = _context.products.IgnoreQueryFilters().ToList();

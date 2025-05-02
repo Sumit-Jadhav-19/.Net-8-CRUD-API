@@ -41,6 +41,7 @@ app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
+app.UseResponseCaching();
 app.UseAuthorization();
 
 app.MapControllers();
